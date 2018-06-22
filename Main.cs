@@ -31,40 +31,12 @@ namespace MMS
             double[] target = inputTarget.Split(',').Select(double.Parse).ToArray();
             double[] mmPosition = inputMmPosition.Split(',').Select(double.Parse).ToArray();
 
-            //double[] control = {4.837, 4.889, 4.966, 5.043, 5.130};
-            //double[] target = {4.838, 4.889, 4.969, 5.046, 5.128};
-            //double[] mmPosition = {10, 30, 60, 90, 120};
+            int interpResolution = 10;
+            int numberOfMeasurements = mmPosition.Length;
 
-            double min = mmPosition[0];
-            double max = mmPosition[0];
-
-            int n = mmPosition.Length;
-
-            for (int i = 0; i < n; i++)
-            {
-                if (min > mmPosition[i]) min = mmPosition[i];
-                if (max < mmPosition[i]) max = mmPosition[i];
-            }
-
-            int m = 10;
-
-            double mmPositionRange = max - min;
-            double mmPositionStep = mmPositionRange / (m - 1);
-            double[] xx = new double[m];
-
-            for (int i = 0; i < m - 1; i++)
-            {
-                xx[i] = min + (mmPositionStep * i);
-            }
-
-            xx[m - 1] = max;
-
-            /*
-            foreach(var item in xx)
-            {
-                Console.WriteLine(item.ToString());
-            }
-            */
+            Tuple<double[],double> mmPositionFigures = Process.Discretise(mmPosition, interpResolution, numberOfMeasurements);
+            double[] xx = mmPositionFigures.Item1;
+            double mmPositionStep = mmPositionFigures.Item2;
 
             // code relies on abscissa values to be sorted
             // there is a check for this condition, but no fix
@@ -80,13 +52,13 @@ namespace MMS
             double[] gradControl = new double[xx.Length - 1];
             double[] gradTarget = new double[xx.Length - 1];
 
-            for (int i = 0; i < m; i++)
+            for (int i = 0; i < interpResolution; i++)
             {
                 splineControl[i] = CSControl.Interpolate(xx[i]).Value;
                 splineTarget[i] = CSTarget.Interpolate(xx[i]).Value;
             }
 
-            for (int i = 0; i < m - 1; i++)
+            for (int i = 0; i < interpResolution - 1; i++)
             {
                 gradControl[i] = (splineControl[i + 1] - splineControl[i]) / mmPositionStep;
                 gradTarget[i] = (splineTarget[i + 1] - splineTarget[i]) / mmPositionStep;
@@ -99,7 +71,7 @@ namespace MMS
             double[] trimmedControl = new double[control.Length - 2];
             double[] trimmedTarget = new double[target.Length - 2];
 
-            for (int i = 1; i < n - 1; i++)
+            for (int i = 1; i < numberOfMeasurements - 1; i++)
             {
                 trimmedMmPosition[i - 1] = mmPosition[i];
                 trimmedControl[i - 1] = control[i];
@@ -117,7 +89,7 @@ namespace MMS
             double[] linearControl = new double[xx.Length];
             double[] linearTarget = new double[xx.Length];
 
-            for (int i = 0; i < m; i++)
+            for (int i = 0; i < interpResolution; i++)
             {
                 linearControl[i] = (linearControlSlope * xx[i]) + linearControlIntercept;
                 linearTarget[i] = (linearTargetSlope * xx[i]) + linearTargetIntercept;
@@ -125,7 +97,7 @@ namespace MMS
 
             double[] diameterShift = new double[control.Length - 2];
 
-            for (int i = 1; i < n - 1; i++)
+            for (int i = 1; i < numberOfMeasurements - 1; i++)
             {
                 diameterShift[i - 1] = trimmedTarget[i - 1] - trimmedControl[i - 1];
             }

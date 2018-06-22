@@ -45,11 +45,11 @@ namespace MMS
             return score;
         }
 
-        static readonly string[] Columns = new[] { "I", "H", "G", "F", "E", "D", "C", "B", "A" };
+        static readonly string[] Columns = { "I", "H", "G", "F", "E", "D", "C", "B", "A" };
         public static string NumberToLetter(int index)
         {
             if (index <= 0)
-                throw new IndexOutOfRangeException("index must be a positive number");
+                throw new IndexOutOfRangeException("Index must be a positive number");
 
             return Columns[index - 1];
         }
