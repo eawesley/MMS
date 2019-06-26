@@ -41,6 +41,7 @@ namespace MMS
             // code relies on abscissa values to be sorted
             // there is a check for this condition, but no fix
             // f(x) = 1/(1+x^2)*sin(x)
+			// this is a test change
 
             BasicInterpolation.LinearInterpolation LIControl = new BasicInterpolation.LinearInterpolation(mmPosition, control);
             BasicInterpolation.LinearInterpolation LITarget = new BasicInterpolation.LinearInterpolation(mmPosition, target);
